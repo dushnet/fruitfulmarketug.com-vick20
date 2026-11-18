@@ -34,9 +34,8 @@ export interface CartContextType {
 
 export function createEmptyCart(): Cart {
   return {
-    id: crypto.randomUUID(),
+    id: "empty-cart",
     items: [],
-    updatedAt: new Date().toISOString(),
   };
 }
 

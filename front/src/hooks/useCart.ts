@@ -1,5 +1,5 @@
 //this is where the cart is updated 
-import {useContext, useState} from 'react';
+import { useContext } from 'react';
 import { CartContext } from '../contexts/CartContext';
 
 export default function useCart(){

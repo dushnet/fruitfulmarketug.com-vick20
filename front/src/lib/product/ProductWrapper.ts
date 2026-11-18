@@ -6,7 +6,7 @@ import type {
   VariantAttribute,
   ProductCardData,
 } from '../../components/product/types/product'
-import { CartItem, createEmptyCart } from '../cart/cart-types';
+import type { CartItem } from '../cart/cart-types';
 /* =========================
    Raw mock data types
 ========================= */
@@ -53,7 +53,7 @@ export type RawProduct = {
 export function toProductCardData(
   raw: RawProduct
 ): ProductCardData {
-  const now = new Date().toISOString();
+  const now = "1970-01-01T00:00:00.000Z";
   //console.log('prods len==================== ',raw);
 
   const categories: Category[] = raw.categories.map((category) => ({
@@ -108,7 +108,6 @@ export function toProductCardData(
 }
 
 export function toCartitem(item:ProductCardData):CartItem{
-  const now = new Date().toISOString(); 
   return {
   variantId:item.variants[0].id.toString(),
   productId: item.images[0].product_id.toString(),
