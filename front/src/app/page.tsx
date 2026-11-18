@@ -1,6 +1,6 @@
 import {ShoppingCart} from 'lucide-react'
-import ProductGrid from './components/product/productGrid';
-import {mockProducts} from './test/productMokeData';
+import ProductGrid from '../components/product/productGrid';
+import {mockProducts} from '../test/productMokeData';
 
 export default function Home() {
   return (

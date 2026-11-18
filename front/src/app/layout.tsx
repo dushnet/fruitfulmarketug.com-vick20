@@ -4,6 +4,7 @@ import "./globals.css";
 import Appbar from "./components/appbar";
 import Searchbar from "./components/searchbar";
 import MyFooter from "./components/footer";
+import CartProvider from './component/products/cart/context/CartContext'
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -29,6 +30,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       className={`${geistSans.variable} ${geistMono.variable}  antialiased`}
     >
       <body className="min-h-screen ">
+        <CartProvider>
         <Appbar />
 
         {/* 2. Sticky Search Bar: Now a sibling, so it sticks to the top of the screen */}
@@ -37,6 +39,7 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         </div>
         <main>{children}</main>
         <MyFooter />
+        </CartProvider>
       </body>
     </html>
   );
