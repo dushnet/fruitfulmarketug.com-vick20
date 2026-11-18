@@ -5,7 +5,8 @@ import type {
   VariantWithAttributes,
   VariantAttribute,
   ProductCardData,
-} from '@/app/components/product/types/product'
+} from '../../components/product/types/product'
+import { CartItem, createEmptyCart } from '../cart/cart-types';
 /* =========================
    Raw mock data types
 ========================= */
@@ -104,4 +105,16 @@ export function toProductCardData(
     images,
     variants,
   };
+}
+
+export function toCartitem(item:ProductCardData):CartItem{
+  const now = new Date().toISOString(); 
+  return {
+  variantId:item.variants[0].id.toString(),
+  productId: item.images[0].product_id.toString(),
+  name: item.name,
+  image: item.images[0].url,
+  unitPrice: item.variants[0].price,
+  quantity: 0,
+  }
 }

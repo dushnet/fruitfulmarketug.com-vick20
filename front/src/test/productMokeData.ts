@@ -1,4 +1,4 @@
-import {toProductCardData} from '@/app/lib/product/ProductWrapper'
+import {toProductCardData} from '../lib/product/ProductWrapper'
 import { ProductCardData } from '../components/product/types/product';
 export const mockdata:any[] = [
   {

@@ -3,8 +3,13 @@ import Searchbar from "./searchbar";
 import { ShoppingCart } from "lucide-react";
 import MenuToggle from "./toggleMenue";
 import Image from "next/image";
+import CartIcon from "./cart/CartIcon";
+import { AnimatedCartBadge } from "./cart/Animatedcart";
+import useCart from "../hooks/useCart";
+
 
 export default function Appbar() {
+  var {count } =useCart();
   return (
     <>
       {/* 1. Top Bar: Scrolls away naturally */}
@@ -19,7 +24,7 @@ export default function Appbar() {
           />
           {/* icons */}
           <div className="icons flex flex-row items-center gap-3">
-            <ShoppingCart className="text-background size-9" />
+             
             <MenuToggle bg="bg-background" />
           </div>
         </div>
