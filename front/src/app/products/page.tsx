@@ -1,9 +1,9 @@
 //this is the main products page that has the products grid
 //filters
 import { ListFilter } from "lucide-react";
-import { ProductCardData } from "../components/product/types/product";
-import ProductGrid from "../components/product/productGrid";
-import { getProducts } from "../lib/product/productsProvider";
+import { ProductCardData } from "../../components/product/types/product";
+import ProductGrid from "../../components/product/productGrid";
+import { getProducts } from "../../lib/product/productsProvider";
 
 interface GridAttr {
   title: string;
