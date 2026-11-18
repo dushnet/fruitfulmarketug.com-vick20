@@ -1,6 +1,12 @@
-
+'use client'
+import useCart from '../../hooks/useCart';
 import Image from "next/image";
 import { ProductCardData,VariantWithAttributes, ProductImage} from "./types/product";
+import { CartItem } from '@/src/lib/cart/cart-types';
+import { toCartitem } from '@/src/lib/product/ProductWrapper';
+import { CartQuantityStepper } from '../cart/Animatedcart';
+import { useState } from 'react';
+import { ShoppingBasket } from 'lucide-react';
 
  interface ProductCardProps{
    product:ProductCardData;
@@ -9,6 +15,19 @@ export default function ProductCard({product} :ProductCardProps){
   const images:ProductImage[] =product.images;
   const variants:VariantWithAttributes[]=product.variants;;
   const basPrice=product.base_price;
+  //qty picker 
+  const [qty, setQty] = useState(1);
+  
+
+  //cart 
+  const {cart, addItem}= useCart();
+ //add item to cart
+  function addToCart(item:CartItem, quantity:number=qty){
+    return ()=>{
+      addItem({...item,quantity:quantity});
+      
+    }
+  }
 
   //get minmax price
   var min=0
@@ -32,6 +51,8 @@ export default function ProductCard({product} :ProductCardProps){
     }
     return {min:min,max:max}
   }
+
+  
   return (
     <article className="overflow-hidden rounded-xl border border-border bg-surface">
 
@@ -70,10 +91,7 @@ export default function ProductCard({product} :ProductCardProps){
         </div>
 
         {/* Variant */}
-        <div className="flex items-center justify-between gap-2">
-          <span className="text-sm text-text-muted">Size: 1 kg</span>
-          <span className="text-xs text-primary">Choose size</span>
-        </div>
+       
 
         {/* Price and stock */}
         <div className="flex items-center justify-between gap-2">
@@ -86,13 +104,20 @@ export default function ProductCard({product} :ProductCardProps){
           </span>
         </div>
 
+        {/* price selector */}
+         <div className="flex items-center justify-between gap-2">
+          {/* <span className="text-sm text-text-muted">Size: 1 kg</span>
+          <span className="text-xs text-primary">Choose size</span> */}
+          <CartQuantityStepper min={1} max={100} onIncrement={()=>setQty(q => q + 1)} onDecrement={()=>setQty(q => q - 1)} value={qty} size="sm" />
+        </div>
+
         {/* Add to cart */}
         <button
           type="button"
           className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
-        >
+           onClick={addToCart(toCartitem(product))}>
           <span>+</span>
-          Add to Cart
+          Add to <ShoppingBasket size={16} />
         </button>
 
       </div>

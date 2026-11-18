@@ -1,13 +1,14 @@
+'use client'
 import { createContext, useEffect, useMemo, useState } from "react";
 import { CartContextType, Cart, createEmptyCart, CartItem } from "../lib/cart/cart-types";
 import { readStoredCart, storeCart } from "../lib/cart/cart-store";
-import { PreviewCard } from "@base-ui/react";
-import { createDeflate } from "zlib";
+import Logger from "../utils/Logger";
+// import { createDeflate } from "zlib";
 
-const CartContext = createContext<CartContextType | null>(null);
+export const CartContext = createContext<CartContextType | null>(null);
 
 
-export function CartProvider({
+export default function CartProvider({
   children,
 }: {
   children: React.ReactNode;
@@ -15,6 +16,7 @@ export function CartProvider({
   const [cart, setCart] = useState<Cart>(createEmptyCart());
   const [isReady, setIsReady] = useState<boolean>(false);
   const [subtotal, setsubTotal] = useState<number>(0);
+  const count = cart.items.reduce((total, item) => total + item.quantity, 0);
 
   //load cart from storage
   useEffect(() => {
@@ -32,6 +34,7 @@ export function CartProvider({
 
   //add cartaitem
   function addItem(item: CartItem) {
+    Logger.getInstance().info('Adding item to cart:', item);
     setCart(prev => {
       const exists = prev.items?.some(i =>
         i.variantId === item.variantId
@@ -43,6 +46,8 @@ export function CartProvider({
             ? { ...i, quantity: i.quantity + item.quantity }
             : i
         ) : [...prev.items, item]
+
+        Logger.getInstance().info('Updated cart items:', items);
       return {
         ...prev,
         items,
@@ -59,7 +64,7 @@ export function CartProvider({
       items: prev.items.filter(it=>
            variantId !== it.variantId),
       createdAt: new Date().toISOString()
-    }))
+    }));
   }
 
   //update quantiy
@@ -87,18 +92,11 @@ export function CartProvider({
       updatedAt: new Date().toISOString(),
     }));
   }
-
-    // 11. Derived values
-  const count = cart.items.reduce(
-    (total, item) => total + item.quantity,
-    0
-  );
-
   function updateSubtotal(){
       //will fetch the price from the server
   }
 
-  const value = useMemo(
+  const value: CartContextType = useMemo(
     () => ({
       cart,
       count,
@@ -110,7 +108,7 @@ export function CartProvider({
       clearCart,
       updateSubtotal
     }),
-    [cart, count,subtotal, isReady]
+    [cart,count,subtotal, isReady]
   );
 
   return (
