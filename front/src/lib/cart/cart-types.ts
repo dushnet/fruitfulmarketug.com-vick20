@@ -30,6 +30,7 @@ export interface CartContextType {
   ) => void;
   clearCart: () => void;
   updateSubtotal: ()=> void;
+  uiOpen: ({state ,change}:{state:boolean, change:boolean})=> boolean;
 }
 
 export function createEmptyCart(): Cart {

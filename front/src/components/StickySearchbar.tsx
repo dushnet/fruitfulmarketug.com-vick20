@@ -5,7 +5,7 @@ import {AnimatedCartBadge} from "./cart/Animatedcart";
 import  useCart  from "../hooks/useCart";
 
 export default function StickySearchBar() {
-  const { count, isReady } = useCart();
+  const { count, isReady, uiOpen} = useCart();
 
   return (
     <div className="flex flex-row gap-2 w-full sticky top-0 z-50 text-background px-2 pb-2 pt-3 shadow-md bg-primary backdrop-blur-sm bg-opacity-80">
@@ -15,7 +15,7 @@ export default function StickySearchBar() {
       <AnimatedCartBadge
         count={isReady ? count : 0}
         icon="basket"
-        onClick={() => {}}
+        onClick={() => uiOpen({state: true, change: true})}
       />
 
     </div>
