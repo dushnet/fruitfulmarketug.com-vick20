@@ -16,7 +16,7 @@ export default function CartProvider({
   const [cart, setCart] = useState<Cart>(createEmptyCart());
   const [isReady, setIsReady] = useState<boolean>(false);
   const [subtotal, setsubTotal] = useState<number>(0);
-  const count = cart.items.reduce((total, item) => total + item.quantity, 0);
+  const count = cart.items.length;
   const [Open, setOpen] = useState<boolean>(false);
 
   //load cart from storage
