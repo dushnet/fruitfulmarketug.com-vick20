@@ -30,13 +30,13 @@ export interface CartContextType {
   ) => void;
   clearCart: () => void;
   updateSubtotal: ()=> void;
+  uiOpen: ({state ,change}:{state:boolean, change:boolean})=> boolean;
 }
 
 export function createEmptyCart(): Cart {
   return {
-    id: crypto.randomUUID(),
+    id: "empty-cart",
     items: [],
-    updatedAt: new Date().toISOString(),
   };
 }
 

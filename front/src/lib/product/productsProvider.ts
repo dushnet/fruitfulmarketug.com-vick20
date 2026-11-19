@@ -1,6 +1,5 @@
-import { mockdata, mockProducts } from "@/app/test/productMokeData";
-import { toProductCardData } from "./ProductWrapper";
-import { ProductCardData } from "@/app/components/product/types/product";
+import { mockProducts } from "../../test/productMokeData";
+import type { ProductCardData } from "../../components/product/types/product";
 
 export function getProducts(test:boolean){
     const products:ProductCardData[] = test? mockProducts: fetchProductsFromDB();

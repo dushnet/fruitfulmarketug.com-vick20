@@ -1,7 +1,5 @@
-"use-client";
-import { FluidTyping } from '@/components/fluid-typing';
+"use client";
 import { Search } from 'lucide-react';
-// import { FluidTyping } from './components/fluid-typing';
 export default function Searchbar(){
     return (
         <div className="relative rounded-full rounded-[var(--color-border)] flex items-center justify-space-between border-2 px-2 py-1 gap-1 ">

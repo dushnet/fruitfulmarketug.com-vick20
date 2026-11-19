@@ -59,7 +59,10 @@
 
   --globalP:2rem;
 }
-
+*{
+  box-sizing: border-box;
+  font-family: popins, sans-serif;
+}
 @theme inline {
    --color-primary: #0E3725;
      --color-primary2: #499A13;

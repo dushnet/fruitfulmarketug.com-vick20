@@ -3,10 +3,10 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Appbar from "../components/appbar";
-import Searchbar from "../components/searchbar";
 import MyFooter from "../components/footer";
 import CartProvider from '../contexts/CartContext'
 import StickySearchBar from "../components/StickySearchbar";
+import CartSlideIn from "../components/cart/Cartpage";
 
 
 const geistSans = Geist({
@@ -40,6 +40,9 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <div className="flex flex-row gap-2 w-full sticky top-0 z-50 text-background px-2 pb-2 pt-3 shadow-md bg-primary backdrop-blur-sm bg-opacity-80">
           <StickySearchBar />
         </div>
+        //slide in cart
+        <CartSlideIn />
+        
         <main>{children}</main>
         <MyFooter />
         </CartProvider>

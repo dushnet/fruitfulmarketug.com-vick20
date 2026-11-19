@@ -8,7 +8,7 @@ import { getProducts } from "../../lib/product/productsProvider";
 interface GridAttr {
   title: string;
   products: ProductCardData[];
-  props: {};
+  props: {}; 
 }
 
 export default function ProductsPage({ title, products, props }: GridAttr) {

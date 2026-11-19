@@ -17,6 +17,7 @@ export default function CartProvider({
   const [isReady, setIsReady] = useState<boolean>(false);
   const [subtotal, setsubTotal] = useState<number>(0);
   const count = cart.items.reduce((total, item) => total + item.quantity, 0);
+  const [Open, setOpen] = useState<boolean>(false);
 
   //load cart from storage
   useEffect(() => {
@@ -56,7 +57,7 @@ export default function CartProvider({
 
     });
   }
-
+   
   //remove item 
   function removeItem(variantId:string){
     setCart( prev=>({
@@ -92,8 +93,13 @@ export default function CartProvider({
       updatedAt: new Date().toISOString(),
     }));
   }
-  function updateSubtotal(){
+  function updateSubtotal(): number {
       //will fetch the price from the server
+      return 0.00;
+  }
+  function uiOpen(state:boolean,change:boolean):boolean{
+    change && setOpen(state);
+    return Open;
   }
 
   const value: CartContextType = useMemo(
@@ -106,9 +112,10 @@ export default function CartProvider({
       removeItem,
       updateQuantity,
       clearCart,
-      updateSubtotal
+      updateSubtotal,
+      uiOpen:({state,change})=>uiOpen(state,change)
     }),
-    [cart,count,subtotal, isReady]
+    [cart,count,subtotal, isReady,Open]
   );
 
   return (
