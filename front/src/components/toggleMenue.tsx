@@ -1,20 +1,15 @@
 
 "use client";
 
-import { useState } from "react";
-
 export type MenuToggleProps = {
-  onToggle?: (isOpen: boolean) => void;
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
   bg:string;
 };
 
-export default function MenuToggle({ onToggle,bg }:MenuToggleProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  
+export default function MenuToggle({ isOpen, onToggle, bg }:MenuToggleProps) {
   function toggleMenu() {
-    const nextState = !isOpen;
-    setIsOpen(nextState);
-    onToggle?.(nextState);
+    onToggle(!isOpen);
   }
 
   return (
