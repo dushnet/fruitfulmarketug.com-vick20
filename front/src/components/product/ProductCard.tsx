@@ -2,70 +2,66 @@
 import useCart from '../../hooks/useCart';
 import Image from "next/image";
 import { ProductCardData,VariantWithAttributes, ProductImage} from "./types/product";
-import { CartItem } from '@/src/lib/cart/cart-types';
 import { toCartitem } from '@/src/lib/product/ProductWrapper';
+import { createProductJsonLd } from '@/src/lib/product/product-schema';
 import { CartQuantityStepper } from '../cart/Animatedcart';
-import { useState } from 'react';
 import { ShoppingBasket } from 'lucide-react';
 
- interface ProductCardProps{
-   product:ProductCardData;
- }
-export default function ProductCard({product} :ProductCardProps){
-  const images:ProductImage[] =product.images;
-  const variants:VariantWithAttributes[]=product.variants;;
-  const basPrice=product.base_price;
-  //qty picker 
-  const [qty, setQty] = useState(1);
-  
+interface ProductCardProps {
+  product: ProductCardData;
+}
 
-  //cart 
-  const {cart, addItem}= useCart();
- //add item to cart
-  function addToCart(item:CartItem, quantity:number=qty){
-    return ()=>{
-      addItem({...item,quantity:quantity});
-      
-    }
-  }
+export default function ProductCard({ product }: ProductCardProps) {
+  const images: ProductImage[] = product.images;
+  const variants: VariantWithAttributes[] = product.variants;
+  const { cart, addItem, updateQuantity } = useCart();
+  const cartItem = toCartitem(product);
+  const existingCartItem = cart.items.find(
+    (item) => item.variantId === cartItem.variantId,
+  );
+  const productJsonLd = createProductJsonLd(product);
+  const productPrices = variants
+    .filter((variant) => variant.is_active)
+    .flatMap((variant) =>
+      variant.attributes.length > 0
+        ? variant.attributes.map((attribute) => attribute.price ?? variant.price)
+        : [variant.price],
+    )
+    .filter((price) => Number.isFinite(price) && price >= 0);
+  const displayedPrices =
+    productPrices.length > 0 ? productPrices : [product.base_price];
+  const minPrice = Math.min(...displayedPrices);
+  const maxPrice = Math.max(...displayedPrices);
+  const formatPrice = (price: number) => `UGX ${price.toLocaleString("en-UG")}`;
 
-  //get minmax price
-  var min=0
-  var Max=0;
-  type minMax={
-    min:number,
-    max:number
-  }
-  function minMaxPrice():minMax{
-    var prices:number[]=[];
-   for (const variant of variants){
-     for(const attribute of variant.attributes){
-         prices.push(attribute.price ?? variant.price)
-     }
-   }
-    var min:number=0;
-    var max:number=0;
-    for (const price of prices){
-      if(price < min) min=price;
-      if(price > max) max=price;
-    }
-    return {min:min,max:max}
-  }
-
-  
   return (
-    <article className="overflow-hidden rounded-xl border border-border bg-surface">
+    <article
+      aria-labelledby={`product-title-${product.id}`}
+      className="overflow-hidden rounded-xl border border-border bg-surface"
+    >
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(productJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
 
       {/* Product image */}
       <div className="relative aspect-[4/3] overflow-hidden bg-background">
-
-        <Image
-          src={images[0].url}
-          alt={images[0].alt_text?? ""}
-          fill
-          sizes="(max-width: 768px) 50vw, 25vw"
-          className="object-cover"
-        />
+        {images[0] ? (
+          <Image
+            src={images[0].url}
+            alt={images[0].alt_text?.trim() || product.name}
+            fill
+            sizes="(max-width: 768px) 50vw, 25vw"
+            className="object-cover"
+          />
+        ) : (
+          <div
+            aria-hidden="true"
+            className="h-full w-full bg-background"
+          />
+        )}
 
         <span className="absolute left-3 top-3 rounded-full bg-primary px-3 py-1 text-xs font-medium text-white">
           Fresh
@@ -73,10 +69,10 @@ export default function ProductCard({product} :ProductCardProps){
 
         <button
           type="button"
-          aria-label="Add to wishlist"
+          aria-label={`Add ${product.name} to wishlist`}
           className="absolute right-3 top-3 grid size-9 place-items-center rounded-full bg-white text-text shadow-sm hover:text-primary"
         >
-          ♡
+          <span aria-hidden="true">♡</span>
         </button>
       </div>
 
@@ -84,10 +80,19 @@ export default function ProductCard({product} :ProductCardProps){
       <div className="space-y-3 p-3">
 
         <div>
-          <p className="text-xs text-text-muted">Vegetables</p>
-          <h3 className="font-semibold text-text">
+          {product.categories[0] && (
+            <p className="text-xs text-text-muted">
+              {product.categories[0].name}
+            </p>
+          )}
+          <h3 id={`product-title-${product.id}`} className="font-semibold text-text">
             {product.name}
           </h3>
+          {product.description && (
+            <p className="mt-1 line-clamp-2 text-sm text-text-muted">
+              {product.description}
+            </p>
+          )}
         </div>
 
         {/* Variant */}
@@ -96,29 +101,38 @@ export default function ProductCard({product} :ProductCardProps){
         {/* Price and stock */}
         <div className="flex items-center justify-between gap-2">
           <span className="text-lg font-bold text-primary-dark">
-            UGX 4,000
-          </span>
-
-          <span className="text-xs font-medium text-primary">
-            In stock
+            {productPrices.length > 0
+              ? minPrice === maxPrice
+                ? formatPrice(minPrice)
+                : `${formatPrice(minPrice)} - ${formatPrice(maxPrice)}`
+              : formatPrice(product.base_price)}
           </span>
         </div>
 
-        {/* price selector */}
-         <div className="flex items-center justify-between gap-2">
-          {/* <span className="text-sm text-text-muted">Size: 1 kg</span>
-          <span className="text-xs text-primary">Choose size</span> */}
-          <CartQuantityStepper min={1} max={100} onIncrement={()=>setQty(q => q + 1)} onDecrement={()=>setQty(q => q - 1)} value={qty} size="sm" />
-        </div>
-
-        {/* Add to cart */}
-        <button
-          type="button"
-          className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
-           onClick={addToCart(toCartitem(product))}>
-          <span>+</span>
-          Add to <ShoppingBasket size={16} />
-        </button>
+        {existingCartItem ? (
+          <div className="flex justify-end">
+            <CartQuantityStepper
+              min={1}
+              max={100}
+              value={existingCartItem.quantity}
+              onChange={(quantity) =>
+                updateQuantity(cartItem.variantId, quantity)
+              }
+              size="sm"
+              itemName={product.name}
+            />
+          </div>
+        ) : (
+          <button
+            type="button"
+            className="flex w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 py-2.5 text-sm font-semibold text-white transition hover:bg-primary-dark"
+            onClick={() => addItem({ ...cartItem, quantity: 1 })}
+            aria-label={`Add ${product.name} to basket`}
+          >
+            <span>+</span>
+            Add to <ShoppingBasket size={16} aria-hidden="true" />
+          </button>
+        )}
 
       </div>
     </article>

@@ -3,25 +3,14 @@
 import type { CartItem} from "../../lib/cart/cart-types";
 import Image from "next/image";
 import { CartQuantityStepper } from "./Animatedcart";
-import { useEffect, useState } from "react";
-import { DeleteIcon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import useCart from "@/src/hooks/useCart";
 interface CartItemProps{
     item:CartItem
-    props?:{}
 }
-export default function CartItem( { props,item }:CartItemProps){
-    const{updateQuantity,addItem,removeItem}=useCart();
-    const [qty, setQty] = useState<number>(item.quantity);
-    const [totalPrice, setTotalPrice] = useState<number>(item.unitPrice * item.quantity);
-    
-    //calculate total price when quantity changes
-    useEffect(() => {
-        setTotalPrice(item.unitPrice * qty);
-      }, [qty, item.unitPrice]);
-      function handleIncrement() {
-        updateQuantity(item.variantId,qty);
-      }
+export default function CartItem({ item }: CartItemProps) {
+    const { updateQuantity, removeItem } = useCart();
+    const totalPrice = item.unitPrice * item.quantity;
 
     return(
         <aside className="cart-item flex flex-row justify-between items-center h-auto p-2 border-b border-gray-200 gap-2 text-[0.875rem] text-primary">
@@ -40,8 +29,8 @@ export default function CartItem( { props,item }:CartItemProps){
             <p className="item-total-price text-lg font-bold">Ugx:{totalPrice.toFixed(2)}</p>
         </div>
         <div className="cart-item-quantity flex flex-col justify-end items-end gap-2"> 
-            <Trash2 className="cart-item-delete-icon" color={'red'} />
-            <CartQuantityStepper min={1} max={100} onIncrement={()=>setQty(q => q + 1)} onDecrement={()=>setQty(q => q - 1)} value={qty} size="sm"  />
+            <Trash2 className="cart-item-delete-icon cursor-pointer" color={'red'} onClick={() => removeItem(item.variantId)} />
+            <CartQuantityStepper min={1} max={100} onIncrement={()=>updateQuantity(item.variantId, item.quantity + 1)} onDecrement={()=>updateQuantity(item.variantId, item.quantity - 1)} value={item.quantity} size="sm"  />
         </div>
     </aside>)
 }

@@ -40,7 +40,7 @@ export default function CartProvider({
       const exists = prev.items?.some(i =>
         i.variantId === item.variantId
       );
-
+      Logger.getInstance().info('Item exists in cart:', exists);
       const items = exists
         ? prev.items.map((i) =>
           i.variantId === item.variantId
