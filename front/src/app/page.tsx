@@ -15,7 +15,7 @@ export default function Home() {
           <p className=''>featured products</p>
           <button>see all</button>
         </div>
-        <ProductGrid products={mockProducts}/>
+        <ProductGrid products={mockProducts} columns={3}/>
       </main >
 
      
