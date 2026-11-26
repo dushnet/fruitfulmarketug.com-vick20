@@ -5,11 +5,11 @@ import { useState, useEffect } from "react";
 
 interface ProductGridProps {
   products: ProductCardData[];
-  columns: number;
+  columns?: number;
 }
 export default function ProductGrid({
   products,
-  columns ,
+  columns = 2,
 }: ProductGridProps) {
 
   const gridColumns: Record<number, string> = {

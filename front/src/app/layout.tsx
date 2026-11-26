@@ -1,4 +1,5 @@
 
+import { Suspense } from "react";
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
@@ -7,6 +8,7 @@ import MyFooter from "../components/footer";
 import CartProvider from '../contexts/CartContext'
 import StickySearchBar from "../components/StickySearchbar";
 import CartSlideIn from "../components/cart/Cartpage";
+import { Toaster } from "../components/ui/sonner";
 
 
 const geistSans = Geist({
@@ -44,7 +46,10 @@ export default function RootLayout({ children }: LayoutProps<'/'>) {
         <CartSlideIn />
         
         <main>{children}</main>
-        <MyFooter />
+        <Suspense fallback={<footer className="bg-gray-900 text-white py-4 px-6" />}>
+          <MyFooter />
+        </Suspense>
+        <Toaster position="bottom-right" theme="light" richColors />
         </CartProvider>
       </body>
     </html>
