@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import MenuToggle from "./toggleMenue";
 import Image from "next/image";
+import { PWAInstallButton } from "./pwa/PWAInstallButton";
 
 const navItems = [
   { label: "About Us", href: "/about-us" },
@@ -98,15 +99,17 @@ export default function Appbar() {
           {/* Desktop Navigation */}
           <nav
             aria-label="Main navigation"
-            className="hidden md:flex items-center gap-8"
+            className="hidden md:flex items-center gap-6"
           >
             <Suspense fallback={<DesktopNavLinks activePath={null} />}>
               <DesktopNavWithPathname />
             </Suspense>
+            <PWAInstallButton variant="compact" />
           </nav>
 
           {/* Mobile Menu Toggle (unchanged on mobile) */}
-          <div className="icons flex flex-row items-center gap-3 md:hidden">
+          <div className="icons flex flex-row items-center gap-2 md:hidden">
+            <PWAInstallButton variant="compact" />
             <MenuToggle
               bg="bg-background"
               isOpen={isMenuOpen}

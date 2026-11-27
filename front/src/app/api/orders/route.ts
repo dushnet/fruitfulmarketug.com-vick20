@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/src/lib/supabase/server";
+import { sendNewOrderPushNotification } from "@/src/lib/push/send-push";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -243,6 +244,13 @@ export async function POST(request: NextRequest) {
       { status: 500 }
     );
   }
+
+  // Broadcast Web Push notification to all subscribed admin devices
+  void sendNewOrderPushNotification({
+    id: createdOrder.id,
+    customer_name: customerName,
+    total_amount: totalAmount,
+  });
 
   return NextResponse.json(
     {

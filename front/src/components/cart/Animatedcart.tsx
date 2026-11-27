@@ -95,28 +95,25 @@ export function AnimatedCartCounter({
   bounceScale = SPRING_PRESETS.bouncy.bounceScale,
   showPulse = true,
   className = '',
-  pulseClassName = 'border-accent/70',
   ariaLabel = 'Cart count',
   formatValue,
 }: AnimatedCartCounterProps) {
   const prefersReducedMotion = useReducedMotion();
   const safeValue = Math.max(0, Math.round(value * 100) / 100);
 
-  const [history, setHistory] = useState<{ current: number; prev: number }>({
-    current: safeValue,
-    prev: safeValue,
-  });
+  const prevValueRef = useRef(safeValue);
+  const [direction, setDirection] = useState(1);
 
-  if (safeValue !== history.current) {
-    setHistory({ current: safeValue, prev: history.current });
-  }
-
-  const direction = history.current >= history.prev ? 1 : -1;
+  useEffect(() => {
+    if (safeValue !== prevValueRef.current) {
+      setDirection(safeValue >= prevValueRef.current ? 1 : -1);
+      prevValueRef.current = safeValue;
+    }
+  }, [safeValue]);
 
   const bounceControls = useAnimationControls();
   const hasMountedRef = useRef(false);
   const animRunRef = useRef(0);
-  const [pulseTick, setPulseTick] = useState(0);
 
   useEffect(() => {
     if (!hasMountedRef.current) {
@@ -126,10 +123,6 @@ export function AnimatedCartCounter({
 
     if (prefersReducedMotion) {
       return;
-    }
-
-    if (direction > 0 && showPulse) {
-      setPulseTick((t) => t + 1);
     }
 
     const runId = ++animRunRef.current;
@@ -171,21 +164,7 @@ export function AnimatedCartCounter({
       className={`relative inline-flex items-center justify-center tabular-nums select-none ${className}`}
     >
       {/* Expanding halo ring on increment */}
-      {showPulse && !prefersReducedMotion && (
-        <AnimatePresence>
-          {pulseTick > 0 && (
-            <motion.span
-              key={pulseTick}
-              aria-hidden="true"
-              initial={{ scale: 0.85, opacity: 0.65 }}
-              animate={{ scale: 1.75, opacity: 0 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
-              className={`pointer-events-none absolute inset-0 rounded-full border-2 ${pulseClassName}`}
-            />
-          )}
-        </AnimatePresence>
-      )}
+
 
       {/* Per-place-value digit columns so unchanged leading digits remain rock-solid */}
       <span className="relative inline-flex items-center overflow-hidden px-0.5 leading-none">
@@ -381,7 +360,10 @@ export function CartQuantityStepper({
   const holdTimeoutRef = useRef<number | null>(null);
   const didHoldRepeatRef = useRef(false);
   const latestValueRef = useRef(value);
-  latestValueRef.current = value;
+
+  useEffect(() => {
+    latestValueRef.current = value;
+  }, [value]);
 
   const stopHold = useCallback(() => {
     if (holdTimeoutRef.current !== null) {
@@ -397,12 +379,7 @@ export function CartQuantityStepper({
     };
   }, [stopHold]);
 
-  // Stop repeating immediately if the value reaches min/max while holding
-  useEffect(() => {
-    if (isHolding && (value <= min || value >= max)) {
-      stopHold();
-    }
-  }, [isHolding, value, min, max, stopHold]);
+
 
   // Global pointerup/cancel guard in case button disables mid-hold
   useEffect(() => {
@@ -416,14 +393,7 @@ export function CartQuantityStepper({
     };
   }, [isHolding, stopHold]);
 
-  useEffect(() => {
-    if (!isEditing) return;
-    setDraftValue(String(value));
-    requestAnimationFrame(() => {
-      inputRef.current?.focus();
-      inputRef.current?.select();
-    });
-  }, [isEditing, value]);
+
 
   const applyStep = useCallback(
     (deltaSign: 1 | -1, magnitude: number) => {
@@ -566,7 +536,14 @@ export function CartQuantityStepper({
       ) : canEditInline ? (
         <button
           type="button"
-          onClick={() => setIsEditing(true)}
+          onClick={() => {
+            setDraftValue(String(value));
+            setIsEditing(true);
+            requestAnimationFrame(() => {
+              inputRef.current?.focus();
+              inputRef.current?.select();
+            });
+          }}
           title="Click to type quantity"
           aria-label={`Edit ${itemName} quantity, current ${value}`}
           className={`inline-flex items-center justify-center rounded-md px-1 font-mono font-semibold text-zinc-900 transition-colors hover:bg-zinc-100 focus-visible:outline-2 focus-visible:outline-blue-700 cursor-text ${

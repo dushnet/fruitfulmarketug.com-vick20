@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Check, ShoppingBasket, Minimize2, Plus } from "lucide-react";
+import { Check, ShoppingBasket, Minimize2 } from "lucide-react";
 import useCart from "@/src/hooks/useCart";
 import { useHasHydrated } from "@/src/hooks/useHasHydrated";
 import { PriceCalculator } from "@/src/lib/cart/price-calculator";

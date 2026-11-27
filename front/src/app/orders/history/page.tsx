@@ -1,19 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Link from "next/link";
 import { ArrowLeft, PackageCheck, ShoppingBag } from "lucide-react";
 import { getStoredOrderHistory, type StoredOrder } from "@/src/lib/orders/order-history";
-import { SITE_URL, WHATSAPP_PHONE } from "@/src/lib/config";
+import { WHATSAPP_PHONE } from "@/src/lib/config";
 
 export default function OrderHistoryPage() {
-  const [orders, setOrders] = useState<StoredOrder[]>([]);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setOrders(getStoredOrderHistory());
-    setIsLoaded(true);
-  }, []);
+  const [orders] = useState<StoredOrder[]>(() => getStoredOrderHistory());
+  const isLoaded = true;
 
   return (
     <main className="container mx-auto max-w-3xl px-4 py-8 md:py-12">
@@ -66,7 +61,6 @@ export default function OrderHistoryPage() {
               dateStyle: "medium",
               timeStyle: "short",
             });
-            const orderUrl = `${SITE_URL}/orders/${order.orderId}`;
             const waText = `Hello Fruitful Market UG, checking on Order #${order.orderId.slice(0, 8)}.`;
             const waUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(waText)}`;
 

@@ -1,13 +1,9 @@
-import { Cart,CartItem, createEmptyCart } from './cart-types';
+import { Cart, createEmptyCart } from './cart-types';
 
 const CART_STORAGE_KEY = "fruitflmarket_cart";
 
 
-interface CartStoreItem {
-    id: string;
-    items: CartItem[];
-    updatedAt: string;
-}
+
 
 //store thecart
 export function storeCart(cart: Cart) {
