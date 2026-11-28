@@ -9,9 +9,13 @@ import {
   Copy,
   Check,
   Send,
+  ExternalLink,
 } from "lucide-react";
 import { playOrderChime } from "./AdminAudioAlert";
-import { subscribeAndSyncAdminPush } from "@/src/lib/push/client-push";
+import {
+  isEmbeddedInIframe,
+  subscribeAndSyncAdminPush,
+} from "@/src/lib/push/client-push";
 import { toast } from "sonner";
 import { PWAInstallButton } from "../pwa/PWAInstallButton";
 
@@ -27,6 +31,7 @@ export default function AdminSettings({
   const [pushPermission, setPushPermission] = useState<"default" | "granted" | "denied">("default");
   const [isDeviceSubscribed, setIsDeviceSubscribed] = useState(false);
   const [supabaseTableReady, setSupabaseTableReady] = useState<boolean | null>(null);
+  const [inIframe, setInIframe] = useState(false);
 
   const [activeSubsCount, setActiveSubsCount] = useState<number>(0);
   const [isSubscribing, setIsSubscribing] = useState(false);
@@ -49,6 +54,7 @@ export default function AdminSettings({
   }, []);
 
   useEffect(() => {
+    setInIframe(isEmbeddedInIframe());
     if (typeof window !== "undefined" && "Notification" in window) {
       setPushPermission(Notification.permission);
       if (Notification.permission === "granted") {
@@ -159,6 +165,22 @@ ALTER TABLE admin_push_subscriptions ENABLE ROW LEVEL SECURITY;`;
         </div>
 
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          {inIframe && (
+            <div className="sm:col-span-2 flex flex-wrap items-center justify-between gap-3 rounded-xl border border-amber-300 bg-amber-50 p-4 text-xs text-amber-900">
+              <p className="flex-1">
+                <strong>Embedded Preview Detected:</strong> Browsers block Service Workers and background Push Notifications inside embedded iframes. Open this page in a standalone browser tab to register your device.
+              </p>
+              <a
+                href="/admin/settings"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-1.5 rounded-lg bg-amber-900 px-3 py-1.5 font-bold text-white hover:bg-amber-800"
+              >
+                <span>Open in New Tab</span>
+                <ExternalLink className="h-3.5 w-3.5" />
+              </a>
+            </div>
+          )}
           <div className="rounded-xl border border-border bg-background p-4 space-y-2">
             <span className="text-xs font-semibold text-text-muted">Device Status</span>
             <p className="text-xs text-text">

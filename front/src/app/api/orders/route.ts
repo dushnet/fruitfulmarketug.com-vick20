@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getSupabaseAdminClient } from "@/src/lib/supabase/server";
 import { sendNewOrderPushNotification } from "@/src/lib/push/send-push";
+import { validateInternationalPhone } from "@/src/lib/phone";
 
 const UUID_REGEX =
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i;
@@ -41,7 +42,7 @@ export async function POST(request: NextRequest) {
 
   const customerName =
     typeof body.customerName === "string" ? body.customerName.trim() : "";
-  const customerPhone =
+  const rawPhone =
     typeof body.customerPhone === "string" ? body.customerPhone.trim() : "";
   const shippingAddress =
     typeof body.shippingAddress === "string" ? body.shippingAddress.trim() : "";
@@ -53,16 +54,18 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  if (
-    customerPhone.length < 7 ||
-    customerPhone.length > 30 ||
-    !/\d{6,}/.test(customerPhone.replace(/\D/g, ""))
-  ) {
+  const phoneCheck = validateInternationalPhone(rawPhone);
+  if (!phoneCheck.valid) {
     return NextResponse.json(
-      { error: "Please provide a valid phone number." },
+      {
+        error:
+          phoneCheck.error ||
+          "Phone number must start with country code (default +256, e.g. +256701234567).",
+      },
       { status: 400 }
     );
   }
+  const customerPhone = phoneCheck.normalized;
 
   if (shippingAddress.length < 5 || shippingAddress.length > 500) {
     return NextResponse.json(

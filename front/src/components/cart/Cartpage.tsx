@@ -8,6 +8,10 @@ import Link from "next/link";
 import { AnimatedCartBadge, AnimatedCartCounter } from "./Animatedcart";
 import { SITE_URL, WHATSAPP_PHONE } from "@/src/lib/config";
 import { saveOrderToHistory } from "@/src/lib/orders/order-history";
+import {
+  DEFAULT_COUNTRY_CODE,
+  validateInternationalPhone,
+} from "@/src/lib/phone";
 import { toast } from "sonner";
 
 export default function CartSlideIn({
@@ -19,7 +23,7 @@ export default function CartSlideIn({
 
   const [isCheckingOut, setIsCheckingOut] = useState(false);
   const [customerName, setCustomerName] = useState("");
-  const [customerPhone, setCustomerPhone] = useState("");
+  const [customerPhone, setCustomerPhone] = useState(DEFAULT_COUNTRY_CODE);
   const [customerEmail, setCustomerEmail] = useState("");
   const [shippingAddress, setShippingAddress] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -43,7 +47,6 @@ export default function CartSlideIn({
     if (!hasItems || isSubmitting) return;
 
     const trimmedName = customerName.trim();
-    const trimmedPhone = customerPhone.trim();
     const trimmedEmail = customerEmail.trim();
     const trimmedAddress = shippingAddress.trim();
 
@@ -51,10 +54,17 @@ export default function CartSlideIn({
       setSubmitError("Please enter your full name.");
       return;
     }
-    if (trimmedPhone.replace(/\D/g, "").length < 6) {
-      setSubmitError("Please enter a valid phone number.");
+
+    const phoneValidation = validateInternationalPhone(customerPhone);
+    if (!phoneValidation.valid) {
+      setSubmitError(
+        phoneValidation.error ||
+          "Phone number must start with a country code (default +256, e.g. +256701234567)."
+      );
       return;
     }
+    const trimmedPhone = phoneValidation.normalized;
+
     if (trimmedAddress.length < 5) {
       setSubmitError("Please enter your delivery location/address.");
       return;
@@ -152,7 +162,7 @@ export default function CartSlideIn({
 
       clearCart();
       setCustomerName("");
-      setCustomerPhone("");
+      setCustomerPhone(DEFAULT_COUNTRY_CODE);
       setCustomerEmail("");
       setShippingAddress("");
       setIsCheckingOut(false);
@@ -303,12 +313,25 @@ export default function CartSlideIn({
                   id="order-customer-phone"
                   type="tel"
                   required
-                  maxLength={30}
+                  pattern="^\+[1-9]\d{8,14}$"
+                  title="Must start with country code, default +256 (e.g. +256701234567)"
+                  maxLength={20}
                   value={customerPhone}
-                  onChange={(e) => setCustomerPhone(e.target.value)}
-                  placeholder="e.g. +256 700 000000"
-                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text focus:border-primary focus:outline-none"
+                  onChange={(e) => {
+                    const cleaned = e.target.value.replace(/[^\d+]/g, "");
+                    const normalized = cleaned.startsWith("+")
+                      ? "+" + cleaned.slice(1).replace(/\+/g, "")
+                      : cleaned
+                      ? cleaned
+                      : DEFAULT_COUNTRY_CODE;
+                    setCustomerPhone(normalized);
+                  }}
+                  placeholder="+256701234567"
+                  className="w-full rounded-lg border border-border px-3 py-2 text-sm text-text focus:border-primary focus:outline-none font-mono"
                 />
+                <p className="mt-1 text-[11px] leading-snug text-text-muted">
+                  Must start with country code (default <strong className="text-primary">+256</strong>, e.g. <span className="font-mono">+256701234567</span> — omit leading 0).
+                </p>
               </div>
 
               <div>
