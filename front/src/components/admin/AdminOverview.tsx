@@ -14,6 +14,7 @@ import {
   Bell,
   Users,
 } from "lucide-react";
+import { ScrollReveal } from "../ui/MotionPrimitives";
 
 export interface OverviewMetrics {
   totalOrders: number;
@@ -88,7 +89,7 @@ export default function AdminOverview({
       {/* KPI Stat Cards */}
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
         {/* Total Revenue */}
-        <div className="rounded-2xl border border-border bg-white p-5 shadow-xs transition hover:shadow-md">
+        <ScrollReveal delay={0} className="rounded-2xl border border-border bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Gross Revenue
@@ -106,10 +107,10 @@ export default function AdminOverview({
               <span>Non-cancelled orders</span>
             </div>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Total Orders */}
-        <div className="rounded-2xl border border-border bg-white p-5 shadow-xs transition hover:shadow-md">
+        <ScrollReveal delay={0.05} className="rounded-2xl border border-border bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Total Orders
@@ -124,10 +125,10 @@ export default function AdminOverview({
             </div>
             <p className="mt-1 text-xs text-text-muted">Lifetime store orders</p>
           </div>
-        </div>
+        </ScrollReveal>
 
         {/* Pending Orders */}
-        <div className="rounded-2xl border border-border bg-white p-5 shadow-xs transition hover:shadow-md">
+        <ScrollReveal delay={0.1} className="rounded-2xl border border-border bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Pending Dispatch
@@ -147,10 +148,10 @@ export default function AdminOverview({
             )}
           </div>
           <p className="mt-1 text-xs text-text-muted">Awaiting confirmation or delivery</p>
-        </div>
+        </ScrollReveal>
 
         {/* Active Products */}
-        <div className="rounded-2xl border border-border bg-white p-5 shadow-xs transition hover:shadow-md">
+        <ScrollReveal delay={0.15} className="rounded-2xl border border-border bg-white p-5 shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md">
           <div className="flex items-center justify-between">
             <span className="text-xs font-semibold uppercase tracking-wider text-text-muted">
               Active Products
@@ -165,7 +166,7 @@ export default function AdminOverview({
             </div>
             <p className="mt-1 text-xs text-text-muted">Live on storefront catalog</p>
           </div>
-        </div>
+        </ScrollReveal>
       </div>
 
       {/* Quick Action Bar */}

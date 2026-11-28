@@ -2,13 +2,19 @@
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
+import { motion, useReducedMotion } from "motion/react";
 import { ArrowLeft, PackageCheck, ShoppingBag } from "lucide-react";
-import { getStoredOrderHistory, type StoredOrder } from "@/src/lib/orders/order-history";
+import {
+  getStoredOrderHistory,
+  type StoredOrder,
+} from "@/src/lib/orders/order-history";
 import { WHATSAPP_PHONE } from "@/src/lib/config";
+import { FadeIn, PREMIUM_EASE } from "@/src/components/ui/MotionPrimitives";
 
 export default function OrderHistoryPage() {
   const [orders, setOrders] = useState<StoredOrder[]>([]);
   const [isLoaded, setIsLoaded] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     setOrders(getStoredOrderHistory());
@@ -20,59 +26,81 @@ export default function OrderHistoryPage() {
       <div className="mb-6 flex items-center justify-between">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <ArrowLeft
+            className="h-4 w-4 transition-transform duration-150 group-hover:-translate-x-0.5"
+            aria-hidden="true"
+          />
           Back to Store
         </Link>
         <Link
           href="/products"
-          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-primary-dark"
+          className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition hover:bg-primary-dark active:scale-[0.98]"
         >
           <ShoppingBag className="h-4 w-4" aria-hidden="true" />
           <span>Shop products</span>
         </Link>
       </div>
 
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-primary md:text-3xl">Browser Order History</h1>
+      <FadeIn className="mb-6">
+        <h1 className="text-2xl font-bold text-primary md:text-3xl">
+          Browser Order History
+        </h1>
         <p className="mt-1 text-sm text-text-muted">
           Orders placed from this browser session are securely saved locally.
         </p>
-      </div>
+      </FadeIn>
 
       {!isLoaded ? (
-        <div className="py-12 text-center text-text-muted">Loading order history...</div>
+        <div className="space-y-4">
+          <div className="animate-shimmer h-44 rounded-2xl border border-border" />
+          <div className="animate-shimmer h-44 rounded-2xl border border-border" />
+        </div>
       ) : orders.length === 0 ? (
-        <div className="rounded-2xl border border-border bg-surface p-12 text-center">
+        <FadeIn className="rounded-2xl border border-border bg-surface p-12 text-center">
           <PackageCheck className="mx-auto mb-3 h-12 w-12 text-text-muted/50" />
-          <h2 className="text-lg font-semibold text-primary">No past orders found</h2>
+          <h2 className="text-lg font-semibold text-primary">
+            No past orders found
+          </h2>
           <p className="mt-1 text-sm text-text-muted">
             When you place orders on Fruitful Market UG, they will appear here.
           </p>
           <div className="mt-6">
             <Link
               href="/products"
-              className="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-primary shadow-sm hover:opacity-90"
+              className="inline-flex items-center justify-center rounded-xl bg-accent px-5 py-3 text-sm font-semibold text-primary shadow-sm transition hover:opacity-90 active:scale-[0.98]"
             >
               Start shopping
             </Link>
           </div>
-        </div>
+        </FadeIn>
       ) : (
         <div className="space-y-4">
-          {orders.map((order) => {
+          {orders.map((order, idx) => {
             const dateStr = new Date(order.createdAt).toLocaleString("en-UG", {
               dateStyle: "medium",
               timeStyle: "short",
             });
-            const waText = `Hello Fruitful Market UG, checking on Order #${order.orderId.slice(0, 8)}.`;
-            const waUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(waText)}`;
+            const waText = `Hello Fruitful Market UG, checking on Order #${order.orderId.slice(
+              0,
+              8
+            )}.`;
+            const waUrl = `https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(
+              waText
+            )}`;
 
             return (
-              <div
+              <motion.div
                 key={order.orderId}
-                className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs transition hover:shadow-sm"
+                initial={prefersReducedMotion ? false : { opacity: 0, y: 14 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{
+                  duration: 0.32,
+                  delay: prefersReducedMotion ? 0 : Math.min(idx, 8) * 0.05,
+                  ease: PREMIUM_EASE,
+                }}
+                className="overflow-hidden rounded-2xl border border-border bg-surface shadow-xs transition-all duration-200 hover:-translate-y-0.5 hover:shadow-md"
               >
                 <div className="flex flex-wrap items-center justify-between gap-3 border-b border-border bg-background px-5 py-3.5 text-xs text-text-muted">
                   <div>
@@ -101,15 +129,23 @@ export default function OrderHistoryPage() {
                   </div>
 
                   <div className="rounded-xl border border-border/70 bg-background p-3 text-xs space-y-1.5">
-                    <p className="font-semibold text-primary">Items ({order.items.length}):</p>
+                    <p className="font-semibold text-primary">
+                      Items ({order.items.length}):
+                    </p>
                     <ul className="divide-y divide-border/50">
-                      {order.items.map((item, idx) => (
-                        <li key={idx} className="flex justify-between py-1 first:pt-0 last:pb-0">
+                      {order.items.map((item, itemIdx) => (
+                        <li
+                          key={itemIdx}
+                          className="flex justify-between py-1 first:pt-0 last:pb-0"
+                        >
                           <span>
                             {item.quantity}x {item.name}
                           </span>
                           <span className="font-medium tabular-nums">
-                            UGX {(item.unitPrice * item.quantity).toLocaleString("en-UG")}
+                            UGX{" "}
+                            {(item.unitPrice * item.quantity).toLocaleString(
+                              "en-UG"
+                            )}
                           </span>
                         </li>
                       ))}
@@ -127,13 +163,13 @@ export default function OrderHistoryPage() {
                       href={waUrl}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700"
+                      className="inline-flex items-center gap-1.5 rounded-lg bg-emerald-600 px-3.5 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.98]"
                     >
                       <span>Chat on WhatsApp</span>
                     </a>
                   </div>
                 </div>
-              </div>
+              </motion.div>
             );
           })}
         </div>

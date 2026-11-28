@@ -74,16 +74,16 @@ export default function AdminPage() {
         onSelectOrder={handleSelectOrder}
       />
 
-      {selectedOrder && (
-        <AdminOrderDetailModal
-          order={selectedOrder}
-          onClose={() => setSelectedOrder(null)}
-          onStatusUpdated={() => {
-            fetchOverview();
+      <AdminOrderDetailModal
+        order={selectedOrder}
+        onClose={() => setSelectedOrder(null)}
+        onStatusUpdated={() => {
+          fetchOverview();
+          if (selectedOrder) {
             handleSelectOrder(selectedOrder.id);
-          }}
-        />
-      )}
+          }
+        }}
+      />
     </>
   );
 }

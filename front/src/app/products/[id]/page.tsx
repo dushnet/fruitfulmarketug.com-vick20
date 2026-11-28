@@ -7,6 +7,8 @@ import ProductGallery from "@/src/components/product/ProductGallery";
 import type { ProductCardData } from "@/src/components/product/types/product";
 import { getProductById } from "@/src/lib/product/productsProvider";
 import { createProductJsonLd } from "@/src/lib/product/product-schema";
+import { ProductDetailSkeleton } from "@/src/components/ui/Skeletons";
+import { FadeIn } from "@/src/components/ui/MotionPrimitives";
 
 type ProductPageProps = {
   params: Promise<{ id: string }>;
@@ -66,13 +68,7 @@ export async function generateMetadata({
 
 export default function ProductDetailsPage({ params }: ProductPageProps) {
   return (
-    <Suspense
-      fallback={
-        <section className="container mx-auto max-w-6xl px-4 py-8 text-text-muted">
-          Loading product...
-        </section>
-      }
-    >
+    <Suspense fallback={<ProductDetailSkeleton />}>
       <ProductDetailsContent params={params} />
     </Suspense>
   );
@@ -96,19 +92,19 @@ async function ProductDetailsContent({ params }: ProductPageProps) {
       className="container mx-auto max-w-6xl px-4 py-5 pb-8 md:py-8 md:pb-12"
     >
       <nav aria-label="Breadcrumb" className="mb-4 md:mb-6 text-sm text-text-muted">
-        <Link href="/" className="hover:text-primary">
+        <Link href="/" className="transition-colors hover:text-primary">
           Home
         </Link>
         <span aria-hidden="true" className="px-2">
           /
         </span>
-        <Link href="/products" className="hover:text-primary">
+        <Link href="/products" className="transition-colors hover:text-primary">
           Products
         </Link>
         <span aria-hidden="true" className="px-2">
           /
         </span>
-        <span aria-current="page" className="text-text font-medium">
+        <span aria-current="page" className="font-medium text-text">
           {product.name}
         </span>
       </nav>
@@ -119,11 +115,11 @@ async function ProductDetailsContent({ params }: ProductPageProps) {
       />
 
       <div className="grid items-start gap-6 md:grid-cols-2 md:gap-10">
-        <div className="md:sticky md:top-20">
+        <FadeIn className="md:sticky md:top-20">
           <ProductGallery productName={product.name} images={product.images} />
-        </div>
+        </FadeIn>
 
-        <div className="space-y-5">
+        <FadeIn delay={0.08} className="space-y-5">
           <div>
             {product.categories[0] && (
               <p className="mb-1 text-xs font-medium tracking-wide text-text-muted">
@@ -150,7 +146,7 @@ async function ProductDetailsContent({ params }: ProductPageProps) {
               </p>
             </div>
           )}
-        </div>
+        </FadeIn>
       </div>
     </section>
   );

@@ -5,6 +5,8 @@ import { notFound } from "next/navigation";
 import { CheckCircle2, ArrowLeft } from "lucide-react";
 import { getSupabaseAdminClient } from "@/src/lib/supabase/server";
 import { getSupabaseClient } from "@/src/lib/supabase";
+import { OrderDetailSkeleton } from "@/src/components/ui/Skeletons";
+import { FadeIn } from "@/src/components/ui/MotionPrimitives";
 
 type OrderPageProps = {
   params: Promise<{ id: string }>;
@@ -101,13 +103,7 @@ export async function generateMetadata({
 
 export default function OrderPage({ params }: OrderPageProps) {
   return (
-    <Suspense
-      fallback={
-        <div className="container mx-auto max-w-2xl px-4 py-16 text-center text-text-muted">
-          Loading order details...
-        </div>
-      }
-    >
+    <Suspense fallback={<OrderDetailSkeleton />}>
       <OrderContent params={params} />
     </Suspense>
   );
@@ -132,14 +128,17 @@ async function OrderContent({ params }: OrderPageProps) {
       <div className="mb-6">
         <Link
           href="/"
-          className="inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
+          className="group inline-flex items-center gap-2 text-sm font-medium text-primary hover:underline"
         >
-          <ArrowLeft className="h-4 w-4" aria-hidden="true" />
+          <ArrowLeft
+            className="h-4 w-4 transition-transform duration-150 group-hover:-translate-x-0.5"
+            aria-hidden="true"
+          />
           Back to Store
         </Link>
       </div>
 
-      <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+      <FadeIn className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
         <div className="bg-primary p-6 text-white text-center">
           <CheckCircle2 className="mx-auto mb-2 h-12 w-12 text-accent" />
           <h1 className="text-2xl font-bold">Order Confirmed!</h1>
@@ -208,13 +207,13 @@ async function OrderContent({ params }: OrderPageProps) {
               href={`https://wa.me/${WHATSAPP_PHONE}?text=${encodeURIComponent(`Hello Fruitful Market UG, I would like to check on Order #${order.id.slice(0, 8)}.`)}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700"
+              className="flex w-full items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-3 text-sm font-semibold text-white transition hover:bg-emerald-700 active:scale-[0.99]"
             >
               <span>Chat with us on WhatsApp</span>
             </a>
           </div>
         </div>
-      </div>
+      </FadeIn>
     </main>
   );
 }

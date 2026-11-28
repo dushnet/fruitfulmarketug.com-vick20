@@ -1,7 +1,8 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Image from "next/image";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import {
   X,
   Phone,
@@ -11,6 +12,7 @@ import {
   CheckCircle,
 } from "lucide-react";
 import { toast } from "sonner";
+import { PREMIUM_EASE } from "../ui/MotionPrimitives";
 
 export interface OrderDetailItem {
   id: string;
@@ -55,10 +57,26 @@ export default function AdminOrderDetailModal({
   const [selectedStatus, setSelectedStatus] = useState<string>(order?.status || "pending");
   const [selectedDelivery, setSelectedDelivery] = useState<string>(order?.delivery?.status || "pending");
   const [isUpdating, setIsUpdating] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
 
-  if (!order) return null;
+  useEffect(() => {
+    if (order) {
+      setSelectedStatus(order.status || "pending");
+      setSelectedDelivery(order.delivery?.status || "pending");
+    }
+  }, [order]);
+
+  useEffect(() => {
+    if (!order) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [order, onClose]);
 
   const handleSaveStatus = async () => {
+    if (!order) return;
     setIsUpdating(true);
     try {
       const res = await fetch(`/api/admin/orders/${order.id}`, {
@@ -85,30 +103,54 @@ export default function AdminOrderDetailModal({
     }
   };
 
-  const cleanPhone = order.customerPhone.replace(/\D/g, "");
-  const waUrl = `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
-    `Hello ${order.customerName}, this is Fruitful Market UG regarding your order #${order.id.slice(0, 8)}.`
-  )}`;
+  const cleanPhone = (order?.customerPhone ?? "").replace(/\D/g, "");
+  const waUrl = order
+    ? `https://wa.me/${cleanPhone}?text=${encodeURIComponent(
+        `Hello ${order.customerName}, this is Fruitful Market UG regarding your order #${order.id.slice(0, 8)}.`
+      )}`
+    : "#";
 
-  const dateStr = new Date(order.createdAt).toLocaleString("en-UG", {
-    dateStyle: "full",
-    timeStyle: "short",
-  });
+  const dateStr = order
+    ? new Date(order.createdAt).toLocaleString("en-UG", {
+        dateStyle: "full",
+        timeStyle: "short",
+      })
+    : "";
 
   return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
-      onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label={`Order details for #${order.id.slice(0, 8)}`}
-    >
-      <div
-        className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-2xl"
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
+    <AnimatePresence>
+      {order && (
+        <motion.div
+          key="admin-order-modal-backdrop"
+          initial={prefersReducedMotion ? false : { opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-xs"
+          onClick={onClose}
+          role="dialog"
+          aria-modal="true"
+          aria-label={`Order details for #${order.id.slice(0, 8)}`}
+        >
+          <motion.div
+            key="admin-order-modal-panel"
+            initial={
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, scale: 0.96, y: 12 }
+            }
+            animate={{ opacity: 1, scale: 1, y: 0 }}
+            exit={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, scale: 0.96, y: 8 }
+            }
+            transition={{ duration: 0.22, ease: PREMIUM_EASE }}
+            className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden rounded-2xl border border-border bg-white shadow-2xl"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-border bg-background px-6 py-4">
           <div>
             <div className="flex items-center gap-2">
               <span className="font-mono text-sm font-bold text-primary">
@@ -303,7 +345,9 @@ export default function AdminOrderDetailModal({
             </div>
           </div>
         </div>
-      </div>
-    </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

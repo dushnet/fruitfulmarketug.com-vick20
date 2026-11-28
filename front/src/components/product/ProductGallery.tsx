@@ -1,9 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useState, type KeyboardEvent, type TouchEvent } from "react";
+import { AnimatePresence, motion, useReducedMotion } from "motion/react";
 import { ChevronLeft, ChevronRight, ImageOff } from "lucide-react";
 import type { ProductImage } from "./types/product";
+import { ProgressiveImage } from "../ui/ProgressiveImage";
+import { PREMIUM_EASE } from "../ui/MotionPrimitives";
 
 interface ProductGalleryProps {
   productName: string;
@@ -15,21 +17,29 @@ export default function ProductGallery({
   images,
 }: ProductGalleryProps) {
   const [selectedImageIndex, setSelectedImageIndex] = useState(0);
-  const [failedUrls, setFailedUrls] = useState<Record<string, boolean>>({});
+  const [direction, setDirection] = useState(1);
   const [touchStartX, setTouchStartX] = useState<number | null>(null);
+  const prefersReducedMotion = useReducedMotion();
 
   const safeIndex =
     images.length > 0 ? Math.min(selectedImageIndex, images.length - 1) : 0;
   const selectedImage = images[safeIndex];
   const hasMultiple = images.length > 1;
 
+  const selectIndex = (nextIndex: number) => {
+    setDirection(nextIndex >= safeIndex ? 1 : -1);
+    setSelectedImageIndex(nextIndex);
+  };
+
   const goPrev = () => {
     if (!hasMultiple) return;
+    setDirection(-1);
     setSelectedImageIndex((prev) => (prev - 1 + images.length) % images.length);
   };
 
   const goNext = () => {
     if (!hasMultiple) return;
+    setDirection(1);
     setSelectedImageIndex((prev) => (prev + 1) % images.length);
   };
 
@@ -71,8 +81,6 @@ export default function ProductGallery({
     );
   }
 
-  const isSelectedBroken = Boolean(failedUrls[selectedImage.url]);
-
   return (
     <div
       className="space-y-3"
@@ -85,44 +93,57 @@ export default function ProductGallery({
         onTouchEnd={handleTouchEnd}
         className="relative aspect-[4/3] sm:aspect-square overflow-hidden rounded-2xl border border-border bg-surface select-none"
       >
-        {isSelectedBroken ? (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-background text-text-muted">
-            <ImageOff className="h-8 w-8 opacity-50" aria-hidden="true" />
-            <span className="text-sm">{productName}</span>
-          </div>
-        ) : (
-          <Image
-            src={selectedImage.url}
-            alt={selectedImage.alt_text?.trim() || productName}
-            fill
-            priority
-            sizes="(max-width: 768px) 100vw, 50vw"
-            className="object-cover transition-opacity duration-200"
-            onError={() =>
-              setFailedUrls((prev) => ({ ...prev, [selectedImage.url]: true }))
+        <AnimatePresence mode="popLayout" initial={false} custom={direction}>
+          <motion.div
+            key={selectedImage.id || selectedImage.url}
+            custom={direction}
+            initial={
+              prefersReducedMotion
+                ? false
+                : { opacity: 0, x: direction > 0 ? 28 : -28, scale: 0.99 }
             }
-          />
-        )}
+            animate={{ opacity: 1, x: 0, scale: 1 }}
+            exit={
+              prefersReducedMotion
+                ? { opacity: 0 }
+                : { opacity: 0, x: direction > 0 ? -28 : 28, scale: 0.99 }
+            }
+            transition={{ duration: 0.28, ease: PREMIUM_EASE }}
+            className="relative h-full w-full"
+          >
+            <ProgressiveImage
+              src={selectedImage.url}
+              alt={selectedImage.alt_text?.trim() || productName}
+              fill
+              priority
+              sizes="(max-width: 768px) 100vw, 50vw"
+              fallbackLabel={productName}
+              className="object-cover"
+            />
+          </motion.div>
+        </AnimatePresence>
 
         {hasMultiple && (
           <>
-            <button
+            <motion.button
               type="button"
               onClick={goPrev}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
               aria-label="Previous image"
               className="absolute left-2.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-primary shadow-sm backdrop-blur-sm transition hover:bg-white focus-visible:outline-2 focus-visible:outline-primary"
             >
               <ChevronLeft className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </motion.button>
 
-            <button
+            <motion.button
               type="button"
               onClick={goNext}
+              whileTap={prefersReducedMotion ? undefined : { scale: 0.9 }}
               aria-label="Next image"
               className="absolute right-2.5 top-1/2 z-10 flex h-11 w-11 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full bg-white/90 text-primary shadow-sm backdrop-blur-sm transition hover:bg-white focus-visible:outline-2 focus-visible:outline-primary"
             >
               <ChevronRight className="h-5 w-5" aria-hidden="true" />
-            </button>
+            </motion.button>
 
             <span
               aria-live="polite"
@@ -142,12 +163,12 @@ export default function ProductGallery({
         >
           {images.map((image, index) => {
             const isSelected = safeIndex === index;
-            const isBroken = Boolean(failedUrls[image.url]);
             return (
-              <button
+              <motion.button
                 key={image.id}
                 type="button"
-                onClick={() => setSelectedImageIndex(index)}
+                onClick={() => selectIndex(index)}
+                whileTap={prefersReducedMotion ? undefined : { scale: 0.94 }}
                 aria-label={`View image ${index + 1} of ${images.length} for ${productName}`}
                 aria-pressed={isSelected}
                 className={`relative h-16 w-16 sm:h-20 sm:w-20 flex-none cursor-pointer overflow-hidden rounded-xl border-2 transition ${
@@ -156,23 +177,15 @@ export default function ProductGallery({
                     : "border-border opacity-75 hover:opacity-100"
                 }`}
               >
-                {isBroken ? (
-                  <div className="flex h-full w-full items-center justify-center bg-background text-text-muted">
-                    <ImageOff className="h-4 w-4" aria-hidden="true" />
-                  </div>
-                ) : (
-                  <Image
-                    src={image.url}
-                    alt=""
-                    fill
-                    sizes="80px"
-                    className="object-cover"
-                    onError={() =>
-                      setFailedUrls((prev) => ({ ...prev, [image.url]: true }))
-                    }
-                  />
-                )}
-              </button>
+                <ProgressiveImage
+                  src={image.url}
+                  alt=""
+                  fill
+                  loading="lazy"
+                  sizes="80px"
+                  className="object-cover"
+                />
+              </motion.button>
             );
           })}
         </div>
